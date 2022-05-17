@@ -1,4 +1,4 @@
-name: deepmeta_multiclass
+name: deepmeta_v2
 channels:
   - pytorch
   - defaults
@@ -138,4 +138,4 @@ dependencies:
     - pyyaml==6.0
     - toml==0.10.2
     - virtualenv==20.13.3
-prefix: /home/edgar/miniconda3/envs/deepmeta_multiclass
+prefix: /home/edgar/miniconda3/envs/deepmeta_v2
