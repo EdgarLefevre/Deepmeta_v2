@@ -165,6 +165,17 @@ def get_args() -> argparse.Namespace:
         help="Conv layer to use (conv or convsep).",
         choices=["conv", "convsep"],
     )
+    parser.add_argument(
+        "--contrast", dest="contrast", action="store_true", help="If flag, enhance contrast on image."
+    )
+    parser.set_defaults(contrast=False)
+    parser.add_argument(
+        "--img_path", type=str, default=None, help="Path to the tiff mouse stack."
+    )
+    parser.add_argument(
+        "--label_path", type=str, default=None, help="Path to the labels folder, if exist. If not, no stats will be "
+                                                     "processed. "
+    )
     args = parser.parse_args()
     pprint.print_bold_red(args)
     return args
@@ -216,8 +227,9 @@ def save_pred(img: np.ndarray, pred: np.ndarray, label: np.ndarray, path: str):
     ax1.set_title("Input image")
     ax2.imshow(pred, cmap="gray")
     ax2.set_title("Prediction")
-    ax3.imshow(label, cmap="gray")
-    ax3.set_title("Label")
+    if label is not None:
+        ax3.imshow(label, cmap="gray")
+        ax3.set_title("Label")
     plt.savefig(path)
     plt.close()
 
