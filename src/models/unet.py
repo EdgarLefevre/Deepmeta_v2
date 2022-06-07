@@ -516,3 +516,81 @@ class Unetpp(nn.Module):
         x = self.up3(x, x12)
         x = self.up4(x, x03)
         return self.outc(x)
+
+
+class ResUnet3plus(
+    nn.Module
+):  # todo: 160 dans cli (attention, voir dans les parts, mais 160 = 5*32)
+    """
+    Implementation of the U-Net model from the paper:
+    "U-Net: Convolutional Networks for Biomedical Image Segmentation"
+    (Ronneberger et al., 2015)
+    """
+
+    def __init__(
+        self,
+        filters: int,
+        classes: int,
+        drop_r: float = 0.1,
+        conv_l: nn.Module = nn.Conv2d,
+    ):
+        """
+        Initialize the U-Net model.
+        :param filters: Number of filters in the first convolutional layer.
+        :type filters: int
+        :param classes: Number of classes to predict.
+        :type classes: int
+        :param drop_r: Dropout rate.
+        :type drop_r: float
+        """
+        super(ResUnet3plus, self).__init__()
+
+        self.down1 = up.Down_Block_res(1, filters)
+        self.down2 = up.Down_Block_res(filters, filters * 2, drop_r)
+        self.down3 = up.Down_Block_res(filters * 2, filters * 4, drop_r)
+        self.down4 = up.Down_Block_res(filters * 4, filters * 8, drop_r)
+
+        self.bridge = up.Bridge_res(filters * 8, filters * 16, drop_r)
+
+        self.up1 = up.Up_Block_res_3p(filters * 16, 160, drop_r, conv_l=conv_l)
+        self.up2 = up.Up_Block_res_3p(160, 160, drop_r, conv_l=conv_l)
+        self.up3 = up.Up_Block_res_3p(160, 160, drop_r, conv_l=conv_l)
+        self.up4 = up.Up_Block_res_3p(160, 160, drop_r, conv_l=conv_l)
+
+        self.concat1 = up.Concat_Block(
+            kernels_down=[8, 4, 2, 1],
+            filters_down=[filters, filters * 2, filters * 4, filters * 8],
+            kernels_up=[],
+            filters_up=[],
+        )
+        self.concat2 = up.Concat_Block(
+            kernels_down=[4, 2, 1],
+            filters_down=[filters, filters * 2, filters * 4],
+            kernels_up=[4],
+            filters_up=[filters * 16],
+        )
+        self.concat3 = up.Concat_Block(
+            kernels_down=[2, 1],
+            filters_down=[filters, filters * 2],
+            kernels_up=[4, 8],
+            filters_up=[160, filters * 16],
+        )
+        self.concat4 = up.Concat_Block(
+            kernels_down=[1],
+            filters_down=[filters],
+            kernels_up=[4, 8, 16],
+            filters_up=[160, 160, filters * 16],
+        )
+        self.outc = up.OutConv(160, classes, conv_l=conv_l)
+
+    def forward(self, x):
+        c1, x1 = self.down1(x)
+        c2, x2 = self.down2(x1)
+        c3, x3 = self.down3(x2)
+        c4, x4 = self.down4(x3)
+        bridge = self.bridge(x4)
+        x5 = self.up1(bridge, self.concat1([c1, c2, c3, c4], []))
+        x6 = self.up2(x5, self.concat2([c1, c2, c3], [bridge]))
+        x7 = self.up3(x6, self.concat3([c1, c2], [x5, bridge]))
+        x8 = self.up4(x7, self.concat4([c1], [x6, x5, bridge]))
+        return self.outc(x8)

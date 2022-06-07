@@ -515,3 +515,33 @@ class NestedBlock(nn.Module):
         conc.append(x)
         x = torch.cat(conc, dim=1)
         return self.conv(x)
+
+
+class Up_Block_res_3p(nn.Module):
+    """Upscaling then double conv"""
+
+    def __init__(
+        self,
+        in_channels: int,
+        out_channels: int,
+        drop: float = 0.1,
+        conv_l: nn.Module = nn.Conv2d,
+    ):
+        """
+        Initialize the Up_Block
+
+        :param in_channels: number of input channels
+        :type in_channels: int
+        :param out_channels: number of output channels
+        :type out_channels: int
+        :param drop: dropout rate
+        :type drop: float
+        """
+        super(Up_Block_res_3p, self).__init__()
+        self.up = nn.ConvTranspose2d(in_channels, 32, kernel_size=(2, 2), stride=(2, 2))
+        self.conv = DoubleConvFullPreact(160, 160, drop)
+
+    def forward(self, x: torch.Tensor, conc: torch.Tensor) -> torch.Tensor:
+        x1 = self.up(x)
+        x = torch.cat([conc, x1], dim=1)
+        return self.conv(x)

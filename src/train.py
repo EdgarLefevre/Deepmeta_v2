@@ -32,7 +32,7 @@ else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-SAVE_PATH = "data/Res_Unet3p_ce+lovasz+focal_full.pth"
+SAVE_PATH = "data/Res_Unet3p_lovasz+focal_convsep_full.pth"
 LOSS = np.inf
 METRIC = [-1.0, -1.0, -1.0]
 

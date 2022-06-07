@@ -135,6 +135,7 @@ def get_args() -> argparse.Namespace:
             "unet",
             "unet_res",
             "unet3p",
+            "res_unet3p",
             "urcnn",
             "att_unet",
             "att_unet3p",
@@ -314,6 +315,10 @@ def get_model(args: argparse.Namespace) -> torch.nn.Module:
             )
         case "att_unet3p":
             model = unet.Att_Unet3plus(
+                filters=args.filters, classes=args.classes, conv_l=get_conv_l(args)
+            )
+        case "res_unet3p":
+            model = unet.ResUnet3plus(
                 filters=args.filters, classes=args.classes, conv_l=get_conv_l(args)
             )
         case _:
@@ -595,7 +600,7 @@ class FusionLoss(nn.Module):
         self.lovasz = LovaszLoss(per_image=True)
 
     def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
-        return self.ce(y_pred, y_true) + self.lovasz(y_pred, y_true) + self.focal(y_pred, y_true)
+        return self.lovasz(y_pred, y_true) + self.focal(y_pred, y_true)
 
 if __name__ == "__main__":
     tanimoto = TanimotoLoss()
