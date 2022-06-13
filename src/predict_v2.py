@@ -8,8 +8,8 @@ import skimage.transform as transform
 import torch
 import torch.nn as nn
 
-import src.utils.data as data
 import src.predict as predict
+import src.utils.data as data
 import src.utils.postprocessing as pp
 import src.utils.pprint as pprint
 import src.utils.utils as utils
