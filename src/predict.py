@@ -80,7 +80,7 @@ def process_img(mouse: torch.Tensor, model: nn.Module) -> List:
     output_stack = []
     for slice in mouse:
         slice = slice.reshape(1, 1, 128, 128)
-        slice = torch.from_numpy(slice).float()
+        slice = torch.from_numpy(slice).float().cuda()
         output = model(slice)
         output = output.max(1).indices
         output_stack.append(output.cpu().detach().numpy())
@@ -95,7 +95,7 @@ def stats(args, output_stack, mouse_labels):
             label_f = mouse_labels[i].flatten()
             res.append(utils.get_metric(args)(label_f, img_f, average=None, labels=[0, 1, 2], zero_division=1))
         res = np.array(res).mean(0)
-        print(res)
+        # print(res)
         return res
 
 

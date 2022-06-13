@@ -2,18 +2,23 @@
 # -*- coding: utf-8 -*-
 
 import os
-
-import ray
-from ray import tune
-from ray.tune.integration.wandb import WandbLogger
-from ray.tune.logger import DEFAULT_LOGGERS
-from ray.tune.schedulers import HyperBandForBOHB
-from ray.tune.suggest.bohb import TuneBOHB
+import torch
+import numpy as np
+import optuna
+from optuna.trial import TrialState
 
 import src.train as t
+import src.predict as p
 import src.utils.utils as utils
+import src.utils.data as data
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+if os.uname()[1] == "iss":
+    BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/3classes_metas/"
+    TEST_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/Souris_Test/"
+else:
+    BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
+    TEST_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Test/"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
 num_samples = 100  # -1 -> infinite, need stop condition
 experiment_name = "unet_multiclass_hp_search"
@@ -29,56 +34,76 @@ def create_folders():
     os.makedirs("wandb", exist_ok=True)
 
 
+def objective(trial):
+    args = utils.get_args()
+    net = utils.get_model(args).cuda()
+    dataloader = data.get_datasets(
+        f'{BASE_PATH}Images/', f'{BASE_PATH}Labels/', args
+    )
+    optimizer = torch.optim.Adam(net.parameters(), lr=args.lr)
+    scaler = torch.cuda.amp.GradScaler()
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
+        optimizer, args.restart, args.restart_mult
+    )
+    for epoch in range(args.epochs):
+        print(f"Training epoch: {epoch+1}")
+        criterion = utils.FusionLoss(args,
+                                     alpha=trial.suggest_float("alpha", 0.1, 1., log=True),
+                                     beta=trial.suggest_float("beta", 0.1, 1., log=True),
+                                     gamma=trial.suggest_float("gamma", 0.1, 1., log=True))
+        net.train()
+        dataset = dataloader["Train"]
+        for inputs, labels in dataset:
+            inputs, labels = inputs.cuda(), (labels.long()).cuda()
+            optimizer.zero_grad()
+            with torch.cuda.amp.autocast():
+                outputs = net(inputs)
+                loss = criterion(outputs, labels.squeeze(1))
+            scaler.scale(loss).backward()
+            scaler.step(optimizer)
+            scaler.update()
+        scheduler.step()
+        net.eval()
+        print('Testing....')
+        test_names = [
+            ("souris_8", True),
+            ("souris_28", True),
+            ("souris_56", True),
+            ("m2Pc_c1_10Corr_1", False),
+        ]
+        stats_list = []
+        for name, contrast in test_names:
+            mouse = p.get_predict_dataset(
+                f"{TEST_PATH}/{name}.tif", contrast=contrast
+            )
+            mouse_labels = p.get_labels(f"{TEST_PATH}/{name}/3classes/")
+            output_stack = p.process_img(mouse, net)
+            stats_list.append(p.stats(args, output_stack, mouse_labels))
+        stat_value = np.array(stats_list).mean(0)
+        trial.report(stat_value[2], epoch)
+        # Handle pruning based on the intermediate value.
+        if trial.should_prune():
+            raise optuna.exceptions.TrialPruned()
+    return stat_value[2]
+
+
 if __name__ == "__main__":
-    create_folders()
-    ray.init(num_cpus=20, num_gpus=2)
+    study = optuna.create_study(direction="maximize")
+    study.optimize(objective, n_trials=100, timeout=600)
 
-    config = vars(utils.get_args())
+    pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
+    complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
 
-    # WANDB
-    # adding wandb keys
-    config["wandb"] = {
-        "project": experiment_name,
-        "api_key_file": "/scratch/elefevre/Projects/DeepMeta/.wandb_key",
-    }
+    print("Study statistics: ")
+    print("  Number of finished trials: ", len(study.trials))
+    print("  Number of pruned trials: ", len(pruned_trials))
+    print("  Number of complete trials: ", len(complete_trials))
 
-    config["lr"] = tune.loguniform(1e-4, 1e-1)
-    config["batch_size"] = tune.qrandint(16, 128, 8)
-    config["model_name"] = "unet"
-    config["w2"] = tune.randint(1, 15)
-    config["w3"] = tune.randint(1, 20)
-    config["drop_r"] = tune.quniform(0.1, 0.3, 0.005)
-    config["filters"] = tune.choice([8, 16, 32])
+    print("Best trial:")
+    trial = study.best_trial
 
-    scheduler = HyperBandForBOHB(
-        time_attr="training_iteration",
-        metric=METRIC,
-        mode=MODE,
-        reduction_factor=2,
-    )
+    print("  Value: ", trial.value)
 
-    search_alg = TuneBOHB(
-        metric=METRIC,
-        mode=MODE,
-        max_concurrent=5,
-    )
-
-    analysis = tune.run(
-        t.train,  # fonction de train
-        loggers=DEFAULT_LOGGERS + (WandbLogger,),
-        config=config,
-        local_dir="ray_results",
-        name=experiment_name,
-        num_samples=num_samples,
-        search_alg=search_alg,
-        scheduler=scheduler,
-        resources_per_trial={"cpu": 10, "gpu": 1},
-    )
-    print(
-        "Best hyperparameters found were: ",
-        analysis.get_best_config(
-            metric=METRIC,
-            mode=MODE,
-        ),
-    )
-    ray.shutdown()
+    print("  Params: ")
+    for key, value in trial.params.items():
+        print("    {}: {}".format(key, value))

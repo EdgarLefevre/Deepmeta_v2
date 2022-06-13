@@ -589,7 +589,7 @@ def mean(elt_list: Any, ignore_nan: bool = False, empty: int = 0) -> torch.Tenso
 
 class FusionLoss(nn.Module):
     def __init__(
-        self, args: argparse.Namespace,
+        self, args: argparse.Namespace, alpha: float = 1, beta: float = 1, gamma: float = 1
     ) -> None:
         super(FusionLoss, self).__init__()
         self.ce = nn.CrossEntropyLoss(
@@ -605,9 +605,13 @@ class FusionLoss(nn.Module):
                 force_reload=False,
             )
         self.lovasz = LovaszLoss(per_image=True)
-
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
     def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
-        return self.ce(y_pred, y_true) + self.lovasz(y_pred, y_true) + self.focal(y_pred, y_true)
+        return self.alpha * self.ce(y_pred, y_true) + \
+               self.beta * self.lovasz(y_pred, y_true) + \
+               self.gamma * self.focal(y_pred, y_true)
 
 if __name__ == "__main__":
     tanimoto = TanimotoLoss()

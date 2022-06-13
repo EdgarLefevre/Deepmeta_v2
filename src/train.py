@@ -147,7 +147,7 @@ def _step(
 
 def train(
     net: nn.Module, dataloader: Dict[str, tud.DataLoader], args: argparse.Namespace
-) -> Tuple[List[float], List[float]]:
+) -> Tuple[List[float], List[float], nn.Module]:
     """
     Train the network
 
@@ -178,7 +178,7 @@ def train(
                 history_train.append(epoch_loss)
         scheduler.step()
     pprint.print_bold_green("Finished Training")
-    return history_train, history_val
+    return history_train, history_val, net
 
 
 def pred_and_display(net: nn.Module, test_loader: tud.DataLoader) -> None:
@@ -253,7 +253,7 @@ if __name__ == "__main__":
     config = utils.get_args()
     model = utils.get_model(config).cuda()
     dataloader = data.get_datasets(BASE_PATH + "Images/", BASE_PATH + "Labels/", config)
-    history_train, history_val = train(model, dataloader, config)
+    history_train, history_val, _ = train(model, dataloader, config)
     utils.plot_learning_curves(history_train, history_val)
     pred_and_display(model, dataloader["Val"])
     # evaluate(model, dataset_val)
