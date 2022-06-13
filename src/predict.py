@@ -93,7 +93,11 @@ def stats(args, output_stack, mouse_labels):
         for i, output in enumerate(output_stack):
             img_f = output.flatten()
             label_f = mouse_labels[i].flatten()
-            res.append(utils.get_metric(args)(label_f, img_f, average=None, labels=[0, 1, 2], zero_division=1))
+            res.append(
+                utils.get_metric(args)(
+                    label_f, img_f, average=None, labels=[0, 1, 2], zero_division=1
+                )
+            )
         res = np.array(res).mean(0)
         # print(res)
         return res
@@ -112,9 +116,7 @@ if __name__ == "__main__":
     stats_list = []
     for name, contrast in test_names:
         pprint.print_gre("Predicting on {}".format(name))
-        mouse = get_predict_dataset(
-            f"{BASE_PATH}/{name}.tif", contrast=contrast
-        )
+        mouse = get_predict_dataset(f"{BASE_PATH}/{name}.tif", contrast=contrast)
         mouse_labels = get_labels(f"{BASE_PATH}/{name}/3classes/")
         output_stack = process_img(mouse, model)
         if args.postprocess:
@@ -124,7 +126,7 @@ if __name__ == "__main__":
         if args.save:
             os.system(f"mkdir -p data/{name}")
             for i, (slice, output, label) in enumerate(
-                    zip(mouse, output_stack, mouse_labels)
+                zip(mouse, output_stack, mouse_labels)
             ):
                 utils.save_pred(
                     slice.reshape(128, 128),
@@ -141,9 +143,7 @@ if __name__ == "__main__":
     stats_list = []
     for name, contrast in test_names:
         pprint.print_gre("Predicting on {}".format(name))
-        mouse = get_predict_dataset(
-            f"{BASE_PATH}/{name}.tif", contrast=contrast
-        )
+        mouse = get_predict_dataset(f"{BASE_PATH}/{name}.tif", contrast=contrast)
         mouse_labels = get_labels(f"{BASE_PATH}/{name}/3classes/")
         output_stack = process_img(mouse, model)
         if args.postprocess:
@@ -153,7 +153,7 @@ if __name__ == "__main__":
         if args.save:
             os.system(f"mkdir -p data/{name}")
             for i, (slice, output, label) in enumerate(
-                    zip(mouse, output_stack, mouse_labels)
+                zip(mouse, output_stack, mouse_labels)
             ):
                 utils.save_pred(
                     slice.reshape(128, 128),

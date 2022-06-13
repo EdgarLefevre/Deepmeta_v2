@@ -25,11 +25,9 @@ if __name__ == "__main__":
     pprint.print_gre(f"Model {args.model_path} loaded")
 
     # Load images
-    name = args.img_path.split("/")[-1].split('.')[0]
+    name = args.img_path.split("/")[-1].split(".")[0]
     pprint.print_gre("Predicting on {}".format(name))
-    mouse = predict.get_predict_dataset(
-        args.img_path, contrast=args.contrast
-    )
+    mouse = predict.get_predict_dataset(args.img_path, contrast=args.contrast)
 
     # Load labels
     if args.label_path is not None:
@@ -52,7 +50,7 @@ if __name__ == "__main__":
         os.system(f"mkdir -p data/{name}")
         if mouse_labels is not None:
             for i, (slice, output, label) in enumerate(
-                    zip(mouse, output_stack, mouse_labels)
+                zip(mouse, output_stack, mouse_labels)
             ):
                 utils.save_pred(
                     slice.reshape(128, 128),
@@ -61,9 +59,7 @@ if __name__ == "__main__":
                     f"data/{name}/{i}.png",
                 )
         else:
-            for i, (slice, output) in enumerate(
-                    zip(mouse, output_stack)
-            ):
+            for i, (slice, output) in enumerate(zip(mouse, output_stack)):
                 utils.save_pred(
                     slice.reshape(128, 128),
                     output.reshape(128, 128),

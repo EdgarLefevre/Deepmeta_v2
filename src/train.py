@@ -75,7 +75,7 @@ def _step(
     args: argparse.Namespace,
     step: str,
     optimizer: torch.optim.Optimizer,
-    scaler: torch.cuda.amp.GradScaler
+    scaler: torch.cuda.amp.GradScaler,
 ) -> float:
     """
     Train or validate the network
