@@ -2,15 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import os
-import torch
+
 import numpy as np
 import optuna
+import torch
 from optuna.trial import TrialState
 
-import src.train as t
 import src.predict as p
-import src.utils.utils as utils
+import src.train as t
 import src.utils.data as data
+import src.utils.utils as utils
 
 if os.uname()[1] == "iss":
     BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/3classes_metas/"
