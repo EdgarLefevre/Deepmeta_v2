@@ -6,8 +6,8 @@ import torch
 import numpy as np
 import optuna
 from optuna.trial import TrialState
+import wandb
 
-import src.train as t
 import src.predict as p
 import src.utils.utils as utils
 import src.utils.data as data
@@ -20,10 +20,8 @@ else:
     TEST_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Test/"
     os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
 
-num_samples = 100  # -1 -> infinite, need stop condition
-experiment_name = "unet_multiclass_hp_search"
-METRIC = "metric"  # this is the name of the attribute in tune reporter
-MODE = "max"
+EXPERIMENT_NAME = "unet_multiclass_hp_search"
+ENTITY = "elefevre"
 
 
 def create_folders():
@@ -44,6 +42,17 @@ def objective(trial):
     scaler = torch.cuda.amp.GradScaler()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, args.restart, args.restart_mult
+    )
+    # init tracking experiment.
+    # hyper-parameters, trial id are stored.
+    config = dict(trial.params)
+    config["trial.number"] = trial.number
+    wandb.init(
+        project="DeepMeta Multiclass",
+        entity=ENTITY,  # NOTE: this entity depends on your wandb account.
+        config=config,
+        group=EXPERIMENT_NAME,
+        reinit=True,
     )
     for epoch in range(args.epochs):
         print(f"Training epoch: {epoch+1}")
@@ -81,15 +90,20 @@ def objective(trial):
             stats_list.append(p.stats(args, output_stack, mouse_labels))
         stat_value = np.array(stats_list).mean(0)
         trial.report(stat_value[2], epoch)
+        # report validation accuracy to wandb
+        wandb.log(data={"Metastases accuracy": stat_value[2],
+                        "Lung accuracy": stat_value[1]}, step=epoch)
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
+            wandb.run.summary["state"] = "pruned"
+            wandb.finish(quiet=True)
             raise optuna.exceptions.TrialPruned()
     return stat_value[2]
 
 
 if __name__ == "__main__":
     study = optuna.create_study(direction="maximize")
-    study.optimize(objective, n_trials=100, timeout=600)
+    study.optimize(objective, n_trials=100)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
     complete_trials = study.get_trials(deepcopy=False, states=[TrialState.COMPLETE])
