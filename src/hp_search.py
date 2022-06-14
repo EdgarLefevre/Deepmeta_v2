@@ -2,15 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import os
-import torch
+
 import numpy as np
 import optuna
+import torch
 from optuna.trial import TrialState
 import wandb
 
 import src.predict as p
-import src.utils.utils as utils
+import src.train as t
 import src.utils.data as data
+import src.utils.utils as utils
 
 if os.uname()[1] == "iss":
     BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/3classes_metas/"
@@ -35,9 +37,7 @@ def create_folders():
 def objective(trial):
     args = utils.get_args()
     net = utils.get_model(args).cuda()
-    dataloader = data.get_datasets(
-        f'{BASE_PATH}Images/', f'{BASE_PATH}Labels/', args
-    )
+    dataloader = data.get_datasets(f"{BASE_PATH}Images/", f"{BASE_PATH}Labels/", args)
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr)
     scaler = torch.cuda.amp.GradScaler()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
@@ -56,10 +56,12 @@ def objective(trial):
     )
     for epoch in range(args.epochs):
         print(f"Training epoch: {epoch+1}")
-        criterion = utils.FusionLoss(args,
-                                     alpha=trial.suggest_float("alpha", 0.1, 1., log=True),
-                                     beta=trial.suggest_float("beta", 0.1, 1., log=True),
-                                     gamma=trial.suggest_float("gamma", 0.1, 1., log=True))
+        criterion = utils.FusionLoss(
+            args,
+            alpha=trial.suggest_float("alpha", 0.1, 1.0, log=True),
+            beta=trial.suggest_float("beta", 0.1, 1.0, log=True),
+            gamma=trial.suggest_float("gamma", 0.1, 1.0, log=True),
+        )
         net.train()
         dataset = dataloader["Train"]
         for inputs, labels in dataset:
@@ -73,7 +75,7 @@ def objective(trial):
             scaler.update()
         scheduler.step()
         net.eval()
-        print('Testing....')
+        print("Testing....")
         test_names = [
             ("souris_8", True),
             ("souris_28", True),
@@ -82,9 +84,7 @@ def objective(trial):
         ]
         stats_list = []
         for name, contrast in test_names:
-            mouse = p.get_predict_dataset(
-                f"{TEST_PATH}/{name}.tif", contrast=contrast
-            )
+            mouse = p.get_predict_dataset(f"{TEST_PATH}/{name}.tif", contrast=contrast)
             mouse_labels = p.get_labels(f"{TEST_PATH}/{name}/3classes/")
             output_stack = p.process_img(mouse, net)
             stats_list.append(p.stats(args, output_stack, mouse_labels))

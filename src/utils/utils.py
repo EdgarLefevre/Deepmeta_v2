@@ -135,6 +135,7 @@ def get_args() -> argparse.Namespace:
             "unet",
             "unet_res",
             "unet3p",
+            "res_unet3p",
             "urcnn",
             "att_unet",
             "att_unet3p",
@@ -166,15 +167,21 @@ def get_args() -> argparse.Namespace:
         choices=["conv", "convsep"],
     )
     parser.add_argument(
-        "--contrast", dest="contrast", action="store_true", help="If flag, enhance contrast on image."
+        "--contrast",
+        dest="contrast",
+        action="store_true",
+        help="If flag, enhance contrast on image.",
     )
     parser.set_defaults(contrast=False)
     parser.add_argument(
         "--img_path", type=str, default=None, help="Path to the tiff mouse stack."
     )
     parser.add_argument(
-        "--label_path", type=str, default=None, help="Path to the labels folder, if exist. If not, no stats will be "
-                                                     "processed. "
+        "--label_path",
+        type=str,
+        default=None,
+        help="Path to the labels folder, if exist. If not, no stats will be "
+        "processed. ",
     )
     args = parser.parse_args()
     pprint.print_bold_red(args)
@@ -326,6 +333,10 @@ def get_model(args: argparse.Namespace) -> torch.nn.Module:
             )
         case "att_unet3p":
             model = unet.Att_Unet3plus(
+                filters=args.filters, classes=args.classes, conv_l=get_conv_l(args)
+            )
+        case "res_unet3p":
+            model = unet.ResUnet3plus(
                 filters=args.filters, classes=args.classes, conv_l=get_conv_l(args)
             )
         case _:
@@ -589,29 +600,37 @@ def mean(elt_list: Any, ignore_nan: bool = False, empty: int = 0) -> torch.Tenso
 
 class FusionLoss(nn.Module):
     def __init__(
-        self, args: argparse.Namespace, alpha: float = 1, beta: float = 1, gamma: float = 1
+        self,
+        args: argparse.Namespace,
+        alpha: float = 1,
+        beta: float = 1,
+        gamma: float = 1,
     ) -> None:
         super(FusionLoss, self).__init__()
         self.ce = nn.CrossEntropyLoss(
-                weight=torch.tensor([args.w1, args.w2, args.w3]).cuda(),
-                label_smoothing=0.1,
-            )
+            weight=torch.tensor([args.w1, args.w2, args.w3]).cuda(),
+            label_smoothing=0.1,
+        )
         self.focal = torch.hub.load(
-                "adeelh/pytorch-multi-class-focal-loss",
-                model="FocalLoss",
-                alpha=torch.tensor([1.0, 5.0, 15.0]).cuda(),
-                gamma=2,
-                reduction="mean",
-                force_reload=False,
-            )
+            "adeelh/pytorch-multi-class-focal-loss",
+            model="FocalLoss",
+            alpha=torch.tensor([1.0, 5.0, 15.0]).cuda(),
+            gamma=2,
+            reduction="mean",
+            force_reload=False,
+        )
         self.lovasz = LovaszLoss(per_image=True)
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
+
     def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
-        return self.alpha * self.ce(y_pred, y_true) + \
-               self.beta * self.lovasz(y_pred, y_true) + \
-               self.gamma * self.focal(y_pred, y_true)
+        return (
+            self.alpha * self.ce(y_pred, y_true)
+            + self.beta * self.lovasz(y_pred, y_true)
+            + self.gamma * self.focal(y_pred, y_true)
+        )
+
 
 if __name__ == "__main__":
     tanimoto = TanimotoLoss()
