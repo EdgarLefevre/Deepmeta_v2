@@ -6,8 +6,8 @@ import os
 import numpy as np
 import optuna
 import torch
-from optuna.trial import TrialState
 import wandb
+from optuna.trial import TrialState
 
 import src.predict as p
 import src.train as t
