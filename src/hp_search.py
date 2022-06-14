@@ -91,8 +91,10 @@ def objective(trial):
         stat_value = np.array(stats_list).mean(0)
         trial.report(stat_value[2], epoch)
         # report validation accuracy to wandb
-        wandb.log(data={"Metastases accuracy": stat_value[2],
-                        "Lung accuracy": stat_value[1]}, step=epoch)
+        wandb.log(
+            data={"Metastases accuracy": stat_value[2], "Lung accuracy": stat_value[1]},
+            step=epoch,
+        )
         # Handle pruning based on the intermediate value.
         if trial.should_prune():
             wandb.run.summary["state"] = "pruned"
