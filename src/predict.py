@@ -16,8 +16,10 @@ import src.utils.utils as utils
 
 if os.uname()[1] == "iss":
     BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/Souris_Test/"
+    BASE_PATH2 = "/home/edgar/Documents/Datasets/deepmeta/Test_annotation_2/"
 else:
-    BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Test/"
+    BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Souris_Test/"
+    BASE_PATH2 = "/home/elefevre/Datasets/deepmeta/Test_annotation_2/"
     os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
@@ -99,13 +101,13 @@ def stats(args, output_stack, mouse_labels):
                 )
             )
         res = np.array(res).mean(0)
-        # print(res)
+        print(res)
         return res
 
 
 if __name__ == "__main__":
     args = utils.get_args()
-    model = load_model(args)
+    model = load_model(args).cuda()
     pprint.print_gre(f"Model {args.model_path} loaded")
     test_names = [
         ("souris_8", True),
@@ -138,29 +140,29 @@ if __name__ == "__main__":
     print(np.array(stats_list).mean(0))
 
     print("\n\n\n")
-    BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Test_annotation_2/"
+
 
     stats_list = []
     for name, contrast in test_names:
         pprint.print_gre("Predicting on {}".format(name))
-        mouse = get_predict_dataset(f"{BASE_PATH}/{name}.tif", contrast=contrast)
-        mouse_labels = get_labels(f"{BASE_PATH}/{name}/3classes/")
+        mouse = get_predict_dataset(f"{BASE_PATH2}/{name}.tif", contrast=contrast)
+        mouse_labels = get_labels(f"{BASE_PATH2}/{name}/3classes/")
         output_stack = process_img(mouse, model)
         if args.postprocess:
             output_stack = pp.postprocess(mouse, np.array(output_stack))
             mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
         stats_list.append(stats(args, output_stack, mouse_labels))
-        if args.save:
-            os.system(f"mkdir -p data/{name}")
-            for i, (slice, output, label) in enumerate(
-                zip(mouse, output_stack, mouse_labels)
-            ):
-                utils.save_pred(
-                    slice.reshape(128, 128),
-                    output.reshape(128, 128),
-                    mouse_labels[i],
-                    f"data/{name}/{i}.png",
-                )
+        # if args.save:
+        #     os.system(f"mkdir -p data/{name}")
+        #     for i, (slice, output, label) in enumerate(
+        #         zip(mouse, output_stack, mouse_labels)
+        #     ):
+        #         utils.save_pred(
+        #             slice.reshape(128, 128),
+        #             output.reshape(128, 128),
+        #             mouse_labels[i],
+        #             f"data/{name}/{i}.png",
+        #         )
     pprint.print_bold_green("Total stats:")
     print(np.array(stats_list).mean(0))
 

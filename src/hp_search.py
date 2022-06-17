@@ -19,8 +19,8 @@ if os.uname()[1] == "iss":
     TEST_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/Souris_Test/"
 else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
-    TEST_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Test/"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+    TEST_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Souris_Test/"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
 
 EXPERIMENT_NAME = "unet_multiclass_hp_search"
 ENTITY = "elefevre"
@@ -47,6 +47,9 @@ def objective(trial):
     # hyper-parameters, trial id are stored.
     config = dict(trial.params)
     config["trial.number"] = trial.number
+    config["alpha"] = trial.suggest_float("alpha", 0., 1.0, log=True),
+    config["beta"] = trial.suggest_float("beta", 0., 1.0, log=True),
+    config["gamma"] = trial.suggest_float("gamma", 0., 1.0, log=True),
     wandb.init(
         project="DeepMeta Multiclass",
         entity=ENTITY,  # NOTE: this entity depends on your wandb account.
@@ -54,14 +57,14 @@ def objective(trial):
         group=EXPERIMENT_NAME,
         reinit=True,
     )
+    criterion = utils.FusionLoss(
+        args,
+        alpha=config["alpha"],
+        beta=config["beta"],
+        gamma=config["gamma"]
+    )
     for epoch in range(args.epochs):
         print(f"Training epoch: {epoch+1}")
-        criterion = utils.FusionLoss(
-            args,
-            alpha=trial.suggest_float("alpha", 0.1, 1.0, log=True),
-            beta=trial.suggest_float("beta", 0.1, 1.0, log=True),
-            gamma=trial.suggest_float("gamma", 0.1, 1.0, log=True),
-        )
         net.train()
         dataset = dataloader["Train"]
         for inputs, labels in dataset:
@@ -85,14 +88,14 @@ def objective(trial):
         stats_list = []
         for name, contrast in test_names:
             mouse = p.get_predict_dataset(f"{TEST_PATH}/{name}.tif", contrast=contrast)
-            mouse_labels = p.get_labels(f"{TEST_PATH}/{name}/3classes/")
+            mouse_labels = p.get_labels(f"{TEST_PATH}{name}/3classes/")
             output_stack = p.process_img(mouse, net)
             stats_list.append(p.stats(args, output_stack, mouse_labels))
         stat_value = np.array(stats_list).mean(0)
         trial.report(stat_value[2], epoch)
         # report validation accuracy to wandb
         wandb.log(
-            data={"Metastases accuracy": stat_value[2], "Lung accuracy": stat_value[1]},
+            data={"Metastases iou": stat_value[2], "Lung iou": stat_value[1]},
             step=epoch,
         )
         # Handle pruning based on the intermediate value.
