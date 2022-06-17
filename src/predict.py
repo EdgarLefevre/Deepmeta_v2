@@ -141,7 +141,6 @@ if __name__ == "__main__":
 
     print("\n\n\n")
 
-
     stats_list = []
     for name, contrast in test_names:
         pprint.print_gre("Predicting on {}".format(name))
