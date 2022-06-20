@@ -107,9 +107,7 @@ def stats(args, output_stack, mouse_labels):
 
 
 def get_meta_nb(masks):
-    _, N = cc3d.connected_components(
-        np.array(masks), return_N=True, connectivity=18
-    )
+    _, N = cc3d.connected_components(np.array(masks), return_N=True, connectivity=18)
     return N
 
 
