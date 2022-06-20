@@ -3,12 +3,12 @@ import argparse  # noqa
 import os
 from typing import List
 
+import cc3d
 import numpy as np
 import skimage.io as io
 import skimage.transform as transform
 import torch
 import torch.nn as nn
-import cc3d
 
 import src.utils.data as data
 import src.utils.postprocessing as pp
