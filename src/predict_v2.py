@@ -44,6 +44,8 @@ if __name__ == "__main__":
             mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
 
     predict.stats(args, output_stack, mouse_labels)
+    nb = predict.get_meta_nb(output_stack > 1.5)
+    print(f"Found: {nb} metastases.")
 
     # Save outputs
     if args.save:

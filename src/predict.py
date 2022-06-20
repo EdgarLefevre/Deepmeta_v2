@@ -8,6 +8,7 @@ import skimage.io as io
 import skimage.transform as transform
 import torch
 import torch.nn as nn
+import cc3d
 
 import src.utils.data as data
 import src.utils.postprocessing as pp
@@ -105,6 +106,13 @@ def stats(args, output_stack, mouse_labels):
         return res
 
 
+def get_meta_nb(masks):
+    _, N = cc3d.connected_components(
+        np.array(masks), return_N=True, connectivity=18
+    )
+    return N
+
+
 if __name__ == "__main__":
     args = utils.get_args()
     model = load_model(args).cuda()
@@ -125,6 +133,8 @@ if __name__ == "__main__":
             output_stack = pp.postprocess(mouse, np.array(output_stack))
             mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
         stats_list.append(stats(args, output_stack, mouse_labels))
+        nb = get_meta_nb(output_stack > 1.5)
+        print(f"Found: {nb} metastases.")
         if args.save:
             os.system(f"mkdir -p data/{name}")
             for i, (slice, output, label) in enumerate(
