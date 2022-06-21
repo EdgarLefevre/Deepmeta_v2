@@ -607,7 +607,7 @@ class FusionLoss(nn.Module):
         alpha: float = 1,
         beta: float = 1,
         gamma: float = 1,
-        device: str = 'cuda'
+        device: str = "cuda",
     ) -> None:
         super(FusionLoss, self).__init__()
         self.ce = nn.CrossEntropyLoss(

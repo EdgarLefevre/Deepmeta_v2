@@ -147,7 +147,10 @@ def _step(
 
 
 def train(
-    net: nn.Module, dataloader: Dict[str, tud.DataLoader], args: argparse.Namespace, device: str = "cuda"
+    net: nn.Module,
+    dataloader: Dict[str, tud.DataLoader],
+    args: argparse.Namespace,
+    device: str = "cuda",
 ) -> Tuple[List[float], List[float], nn.Module]:
     """
     Train the network
@@ -174,7 +177,9 @@ def train(
     for epoch in range(args.epochs):
         pprint.print_gre(f"\nEpoch {epoch + 1}/{args.epochs} :")
         for step in ["Train", "Val"]:
-            epoch_loss = _step(net, dataloader, args, step, optimizer, scaler, device=device)
+            epoch_loss = _step(
+                net, dataloader, args, step, optimizer, scaler, device=device
+            )
             if step == "Val":
                 history_val.append(epoch_loss)
             else:

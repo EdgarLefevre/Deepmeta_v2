@@ -60,10 +60,7 @@ def objective(trial):
         reinit=True,
     )
     criterion = utils.FusionLoss(
-        args,
-        alpha=config["alpha"][0],
-        beta=config["beta"][0],
-        gamma=config["gamma"][0]
+        args, alpha=config["alpha"][0], beta=config["beta"][0], gamma=config["gamma"][0]
     )
     for epoch in range(args.epochs):
         print(f"Training epoch: {epoch+1}")
