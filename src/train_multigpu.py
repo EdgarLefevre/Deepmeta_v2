@@ -27,8 +27,8 @@ METRIC = [-1.0, -1.0, -1.0]
 
 
 def setup(rank, world_size):
-    os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12355'
+    os.environ["MASTER_ADDR"] = "localhost"
+    os.environ["MASTER_PORT"] = "12355"
 
     # initialize the process group
     dist.init_process_group("gloo", rank=rank, world_size=world_size)
@@ -41,9 +41,7 @@ def cleanup():
 def demo_basic(rank, world_size):
     print(f"Running basic DDP example on rank {rank}.")
     config = utils.get_args()
-    dataloader = data.get_datasets(
-        f'{BASE_PATH}Images/', f'{BASE_PATH}Labels/', config
-    )
+    dataloader = data.get_datasets(f"{BASE_PATH}Images/", f"{BASE_PATH}Labels/", config)
     setup(rank, world_size)
     model = utils.get_model(config).to(rank)
     ddp_model = DDP(model, device_ids=[rank])
@@ -52,10 +50,7 @@ def demo_basic(rank, world_size):
 
 
 def run_demo(demo_fn, world_size):
-    mp.spawn(demo_fn,
-             args=(world_size,),
-             nprocs=world_size,
-             join=True)
+    mp.spawn(demo_fn, args=(world_size,), nprocs=world_size, join=True)
 
 
 if __name__ == "__main__":
