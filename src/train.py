@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import collections
+import collections.abc
 import argparse
 import os
 from typing import Dict, List, Tuple
@@ -30,9 +32,9 @@ if os.uname()[1] == "iss":
     BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/3classes_metas/"
 else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "0,5"
 
-SAVE_PATH = "data/Res_Unet3p_lovasz+focal_convsep_full.pth"
+SAVE_PATH = "data/test_multigpu.pth"
 LOSS = np.inf
 METRIC = [-1.0, -1.0, -1.0]
 
@@ -76,6 +78,7 @@ def _step(
     step: str,
     optimizer: torch.optim.Optimizer,
     scaler: torch.cuda.amp.GradScaler,
+    device: str = "cuda",
 ) -> float:
     """
     Train or validate the network
@@ -93,10 +96,8 @@ def _step(
     :return: The loss of the step
     :rtype: float
     """
-    # criterion = nn.CrossEntropyLoss(
-    #     weight=torch.tensor([args.w1, args.w2, args.w3]).cuda(), label_smoothing=0.1
-    # )
-    criterion = utils.get_loss(args)
+
+    criterion = utils.get_loss(args, device=device)
     running_loss = []
     net.train() if step == "Train" else net.eval()
     dataset = dataloader[step]
@@ -104,7 +105,7 @@ def _step(
         f1 = []
         for i, (inputs, labels) in enumerate(dataset):
             bar.update(i)
-            inputs, labels = inputs.cuda(), (labels.long()).cuda()
+            inputs, labels = inputs.to(device), (labels.long()).to(device)
             optimizer.zero_grad()
             with torch.cuda.amp.autocast():
                 outputs = net(inputs)
@@ -146,7 +147,7 @@ def _step(
 
 
 def train(
-    net: nn.Module, dataloader: Dict[str, tud.DataLoader], args: argparse.Namespace
+    net: nn.Module, dataloader: Dict[str, tud.DataLoader], args: argparse.Namespace, device: str = "cuda"
 ) -> Tuple[List[float], List[float], nn.Module]:
     """
     Train the network
@@ -159,6 +160,8 @@ def train(
         The dataloader for the training and validation sets
     args : argparse.Namespace
         The arguments from the command line
+    device : str
+        Device string
     """
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr)
     scaler = torch.cuda.amp.GradScaler()
@@ -171,7 +174,7 @@ def train(
     for epoch in range(args.epochs):
         pprint.print_gre(f"\nEpoch {epoch + 1}/{args.epochs} :")
         for step in ["Train", "Val"]:
-            epoch_loss = _step(net, dataloader, args, step, optimizer, scaler)
+            epoch_loss = _step(net, dataloader, args, step, optimizer, scaler, device=device)
             if step == "Val":
                 history_val.append(epoch_loss)
             else:
@@ -251,7 +254,7 @@ def evaluate(net: nn.Module, test_loader: torch.utils.data.DataLoader) -> None:
 
 if __name__ == "__main__":
     config = utils.get_args()
-    model = utils.get_model(config).cuda()
+    model = nn.DataParallel(utils.get_model(config)).cuda()
     dataloader = data.get_datasets(BASE_PATH + "Images/", BASE_PATH + "Labels/", config)
     history_train, history_val, _ = train(model, dataloader, config)
     utils.plot_learning_curves(history_train, history_val)

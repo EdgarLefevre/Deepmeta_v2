@@ -383,36 +383,38 @@ def get_conv_l(args: argparse.Namespace) -> Any:
     return conv_l
 
 
-def get_loss(args: argparse.Namespace) -> Any:
+def get_loss(args: argparse.Namespace, device: str = "cuda") -> Any:
     """
     Get the loss function.
 
     :param args: Arguments
     :type args: argparse.Namespace
+    :param device: device
+    :type device: str
     :return: Convolutional layer
     :rtype: torch.nn.Module
     """
     match args.loss:
         case "ce":
             criterion = nn.CrossEntropyLoss(
-                weight=torch.tensor([args.w1, args.w2, args.w3]).cuda(),
+                weight=torch.tensor([args.w1, args.w2, args.w3]).to(device),
                 label_smoothing=0.1,
             )
         case "focal":
             criterion = torch.hub.load(
                 "adeelh/pytorch-multi-class-focal-loss",
                 model="FocalLoss",
-                alpha=torch.tensor([1.0, 5.0, 15.0]).cuda(),
+                alpha=torch.tensor([1.0, 5.0, 15.0]).to(device),
                 gamma=2,
                 reduction="mean",
                 force_reload=False,
             )
         case "tanimoto":
-            criterion = TanimotoLoss().cuda()
+            criterion = TanimotoLoss().to(device)
         case "lovasz":
-            criterion = LovaszLoss(per_image=True).cuda()
+            criterion = LovaszLoss(per_image=True).to(device)
         case "fusion":
-            criterion = FusionLoss(args).cuda()
+            criterion = FusionLoss(args, device=device).to(device)
         case _:
             raise ValueError(f"Unknown loss function {args.loss}")
     return criterion
@@ -605,16 +607,17 @@ class FusionLoss(nn.Module):
         alpha: float = 1,
         beta: float = 1,
         gamma: float = 1,
+        device: str = 'cuda'
     ) -> None:
         super(FusionLoss, self).__init__()
         self.ce = nn.CrossEntropyLoss(
-            weight=torch.tensor([args.w1, args.w2, args.w3]).cuda(),
+            weight=torch.tensor([args.w1, args.w2, args.w3]).to(device),
             label_smoothing=0.1,
         )
         self.focal = torch.hub.load(
             "adeelh/pytorch-multi-class-focal-loss",
             model="FocalLoss",
-            alpha=torch.tensor([1.0, 5.0, 15.0]).cuda(),
+            alpha=torch.tensor([1.0, 5.0, 15.0]).to(device),
             gamma=2,
             reduction="mean",
             force_reload=False,

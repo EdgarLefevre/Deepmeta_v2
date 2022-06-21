@@ -47,9 +47,11 @@ def objective(trial):
     # hyper-parameters, trial id are stored.
     config = dict(trial.params)
     config["trial.number"] = trial.number
-    config["alpha"] = (trial.suggest_float("alpha", 0.0, 1.0, log=True),)
-    config["beta"] = (trial.suggest_float("beta", 0.0, 1.0, log=True),)
-    config["gamma"] = (trial.suggest_float("gamma", 0.0, 1.0, log=True),)
+
+    config["alpha"] = trial.suggest_float("alpha", 0.1, 1.0, log=True)
+    config["beta"] = trial.suggest_float("beta", 0.1, 1.0, log=True)
+    config["gamma"] = trial.suggest_float("gamma", 0.1, 1.0, log=True)
+
     wandb.init(
         project="DeepMeta Multiclass",
         entity=ENTITY,  # NOTE: this entity depends on your wandb account.
@@ -58,7 +60,10 @@ def objective(trial):
         reinit=True,
     )
     criterion = utils.FusionLoss(
-        args, alpha=config["alpha"], beta=config["beta"], gamma=config["gamma"]
+        args,
+        alpha=config["alpha"][0],
+        beta=config["beta"][0],
+        gamma=config["gamma"][0]
     )
     for epoch in range(args.epochs):
         print(f"Training epoch: {epoch+1}")
