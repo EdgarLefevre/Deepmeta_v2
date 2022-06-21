@@ -1,18 +1,19 @@
 import os
 import sys
 import tempfile
+
+import numpy as np
 import torch
 import torch.distributed as dist
+import torch.multiprocessing as mp
 import torch.nn as nn
 import torch.optim as optim
-import torch.multiprocessing as mp
-import numpy as np
 from torch.nn.parallel import DistributedDataParallel as DDP
 
+import src.train as t
 import src.utils.data as data
 import src.utils.pprint as pprint
 import src.utils.utils as utils
-import src.train as t
 
 if os.uname()[1] == "iss":
     BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/3classes_metas/"
