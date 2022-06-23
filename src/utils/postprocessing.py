@@ -8,7 +8,7 @@ import skimage.measure as measure  # type: ignore
 from scipy import ndimage  # type: ignore
 
 
-def remove_blobs(mask: 'np.ndarray', min_size: int = 10) -> 'np.ndarray':
+def remove_blobs(mask: "np.ndarray", min_size: int = 10) -> "np.ndarray":
     mask = mask.reshape(128, 128).astype(np.uint8)
     nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(
         mask, connectivity=8
@@ -23,33 +23,32 @@ def remove_blobs(mask: 'np.ndarray', min_size: int = 10) -> 'np.ndarray':
     return img2
 
 
-def dilate_and_erode(img: 'np.ndarray', k1: int = 3, k2: int = 3) -> 'np.ndarray':
+def dilate_and_erode(img: "np.ndarray", k1: int = 3, k2: int = 3) -> "np.ndarray":
     kernel1 = np.ones((k1, k1), np.uint8)
     kernel2 = np.ones((k2, k2), np.uint8)
     img_dilation = cv2.dilate(img, kernel1, iterations=1)
     return cv2.erode(img_dilation, kernel2, iterations=1)
 
 
-def mean_vol_per_meta(mask: 'np.ndarray', vol: float = 0.0047) -> float:
+def mean_vol_per_meta(mask: "np.ndarray", vol: float = 0.0047) -> float:
     _, num = measure.label(mask, return_num=True)
     nb_pix = mask.sum()
     return (nb_pix * vol) / num
 
 
-def vol_mask(mask: 'np.ndarray', vol: float = 0.0047) -> float:
+def vol_mask(mask: "np.ndarray", vol: float = 0.0047) -> float:
     nb_pix = mask.sum()
     return nb_pix * vol
 
 
-def process_meta_number(meta_masks: 'np.ndarray') -> int:
+def process_meta_number(meta_masks: "np.ndarray") -> int:
     labels_out, N = cc3d.connected_components(
         meta_masks, return_N=True, connectivity=18
     )
     return N
 
 
-
-def laplace(img_stack: 'np.ndarray', mask_list: 'np.ndarray') -> 'np.ndarray':
+def laplace(img_stack: "np.ndarray", mask_list: "np.ndarray") -> "np.ndarray":
     """
     Remove false positives in lung segmentation. Apply a
     laplace of gaussian filter on slices, if the mean value of the
@@ -83,7 +82,7 @@ def laplace(img_stack: 'np.ndarray', mask_list: 'np.ndarray') -> 'np.ndarray':
     return mask_list
 
 
-def sanity_check(mask_list: 'np.ndarray') -> 'np.ndarray':
+def sanity_check(mask_list: "np.ndarray") -> "np.ndarray":
     """
     Check if there is some false positive. If mask < 15px -> mask is null.
     If i-1 and i+1 do not contain mask, i does not contains a mask either.
@@ -104,7 +103,7 @@ def sanity_check(mask_list: 'np.ndarray') -> 'np.ndarray':
     return mask_list
 
 
-def postprocess(inputs: 'np.ndarray', masks: 'np.ndarray') -> 'np.ndarray':
+def postprocess(inputs: "np.ndarray", masks: "np.ndarray") -> "np.ndarray":
     masks = laplace(inputs, masks)
     lungs_masks = masks > 0.5
     metas_masks = masks > 1.5
