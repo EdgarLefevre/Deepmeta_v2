@@ -1,5 +1,5 @@
-import torch
-import torch.nn as nn
+import torch  # type: ignore
+import torch.nn as nn  # type: ignore
 
 import src.models.unet_parts as up
 

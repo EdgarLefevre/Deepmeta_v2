@@ -8,7 +8,7 @@ import skimage.measure as measure  # type: ignore
 from scipy import ndimage  # type: ignore
 
 
-def remove_blobs(mask: np.array, min_size: int = 10) -> np.array:
+def remove_blobs(mask: np.ndarray, min_size: int = 10) -> np.array:
     mask = mask.reshape(128, 128).astype(np.uint8)
     nb_components, output, stats, centroids = cv2.connectedComponentsWithStats(
         mask, connectivity=8
@@ -23,14 +23,14 @@ def remove_blobs(mask: np.array, min_size: int = 10) -> np.array:
     return img2
 
 
-def dilate_and_erode(img: np.array, k1: int = 3, k2: int = 3) -> np.array:
+def dilate_and_erode(img: np.ndarray, k1: int = 3, k2: int = 3) -> np.array:
     kernel1 = np.ones((k1, k1), np.uint8)
     kernel2 = np.ones((k2, k2), np.uint8)
     img_dilation = cv2.dilate(img, kernel1, iterations=1)
     return cv2.erode(img_dilation, kernel2, iterations=1)
 
 
-def mean_vol_per_meta(mask: np.array, vol: float = 0.0047) -> float:
+def mean_vol_per_meta(mask: np.ndarray, vol: float = 0.0047) -> float:
     _, num = measure.label(mask, return_num=True)
     nb_pix = mask.sum()
     return (nb_pix * vol) / num
@@ -41,7 +41,7 @@ def vol_mask(mask: np.array, vol: float = 0.0047) -> float:
     return nb_pix * vol
 
 
-def process_meta_number(meta_masks: np.array) -> int:
+def process_meta_number(meta_masks: np.ndarray) -> int:
     labels_out, N = cc3d.connected_components(
         meta_masks, return_N=True, connectivity=18
     )
