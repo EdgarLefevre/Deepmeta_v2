@@ -36,7 +36,7 @@ else:
 
 SAVE_PATH = "data/test_multigpu.pth"
 LOSS = np.inf
-METRIC = [-1.0, -1.0, -1.0]
+METRIC = np.array([-1.0, -1.0, -1.0])
 
 
 def save_model(net: nn.Module, loss: float) -> None:
@@ -246,8 +246,7 @@ def evaluate(net: nn.Module, test_loader: torch.utils.data.DataLoader) -> None:
                     torch.flatten(labels).cpu().detach().numpy(),
                     torch.flatten(outputs).cpu().detach().numpy(),
                     average=None,
-                )
-                / labels.shape[0]
+                ) / labels.shape[0]
             )
     f1_metric = np.array(f1) / float(i + 1)
     pprint.print_mag(

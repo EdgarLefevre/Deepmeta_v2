@@ -129,9 +129,9 @@ if __name__ == "__main__":
         output_stack = process_img(mouse, model)
         if args.postprocess:
             output_stack = pp.postprocess(mouse, np.array(output_stack))  # type: ignore
-            mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
+            mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))  # type: ignore
         stats_list.append(stats(args, output_stack, mouse_labels))  # type: ignore
-        nb = get_meta_nb(_output_stack > 1.5)  # type: ignore
+        nb = get_meta_nb(output_stack > 1.5)  # type: ignore
         print(f"Found: {nb} metastases.")
         if args.save:
             os.system(f"mkdir -p data/{name}")
@@ -172,6 +172,3 @@ if __name__ == "__main__":
         #         )
     pprint.print_bold_green("Total stats:")
     print(np.array(stats_list).mean(0))
-
-# todo: args pour prendre un path d'image / un folder  et le label si il existe pour faire la prediction
-# todo: arg pour faire sur le jeu de test
