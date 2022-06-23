@@ -109,8 +109,12 @@ def postprocess(inputs: "np.ndarray", masks: "np.ndarray") -> "np.ndarray":
     metas_masks = masks > 1.5
     lungs_masks = sanity_check(lungs_masks)
     _lungs_masks = [remove_blobs(mask, 10) for mask in lungs_masks]
-    __lungs_masks = np.array([dilate_and_erode(mask, 3, 3) for mask in _lungs_masks]) / 255
+    __lungs_masks = (
+        np.array([dilate_and_erode(mask, 3, 3) for mask in _lungs_masks]) / 255
+    )
     _metas_masks = [remove_blobs(mask, 3) for mask in metas_masks]
-    __metas_masks = np.array([dilate_and_erode(mask, 3, 3) for mask in _metas_masks]) / 255
+    __metas_masks = (
+        np.array([dilate_and_erode(mask, 3, 3) for mask in _metas_masks]) / 255
+    )
     # return lungs_masks + metas_masks
     return np.where((__metas_masks == 1), 2, __lungs_masks)
