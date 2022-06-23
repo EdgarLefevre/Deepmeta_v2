@@ -629,9 +629,9 @@ class FusionLoss(nn.Module):
 
     def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
         return (
-            self.alpha * self.ce(y_pred, y_true) +  # noqa
-            self.beta * self.lovasz(y_pred, y_true) +  # noqa
-            self.gamma * self.focal(y_pred, y_true)  # noqa
+            self.alpha * self.ce(y_pred, y_true)
+            + self.beta * self.lovasz(y_pred, y_true)  # noqa
+            + self.gamma * self.focal(y_pred, y_true)  # noqa  # noqa
         )
 
 
