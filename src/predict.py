@@ -66,7 +66,7 @@ def get_predict_dataset(path_souris, contrast=True):
     return mouse
 
 
-def get_labels(path: str) -> List[np.array]:
+def get_labels(path: str) -> List['np.ndarray']:
     """
     Loads the labels from the given path
 
@@ -128,10 +128,10 @@ if __name__ == "__main__":
         mouse_labels = get_labels(f"{BASE_PATH}/{name}/3classes/")
         output_stack = process_img(mouse, model)
         if args.postprocess:
-            output_stack = pp.postprocess(mouse, np.array(output_stack))
+            output_stack = pp.postprocess(mouse, np.array(output_stack))  # type: ignore
             mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
-        stats_list.append(stats(args, output_stack, mouse_labels))
-        nb = get_meta_nb(output_stack > 1.5)
+        stats_list.append(stats(args, output_stack, mouse_labels))  # type: ignore
+        nb = get_meta_nb(_output_stack > 1.5)  # type: ignore
         print(f"Found: {nb} metastases.")
         if args.save:
             os.system(f"mkdir -p data/{name}")
@@ -156,8 +156,8 @@ if __name__ == "__main__":
         mouse_labels = get_labels(f"{BASE_PATH2}/{name}/3classes/")
         output_stack = process_img(mouse, model)
         if args.postprocess:
-            output_stack = pp.postprocess(mouse, np.array(output_stack))
-            mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
+            output_stack = pp.postprocess(mouse, np.array(output_stack))  # type: ignore
+            mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))  # type: ignore
         stats_list.append(stats(args, output_stack, mouse_labels))
         # if args.save:
         #     os.system(f"mkdir -p data/{name}")

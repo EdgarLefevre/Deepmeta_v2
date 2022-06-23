@@ -52,7 +52,7 @@ def get_datasets(
     return {"Train": dataset_train, "Val": dataset_val}
 
 
-def contrast_and_reshape(img: np.array) -> np.array:
+def contrast_and_reshape(img: 'np.ndarray') -> 'np.ndarray':
     """
     For some mice, we need to readjust the contrast.
 

@@ -33,18 +33,18 @@ if __name__ == "__main__":
     if args.label_path is not None:
         mouse_labels = predict.get_labels(args.label_path)
     else:
-        mouse_labels = None
+        mouse_labels = None  # type: ignore
 
     # Process img stack
     output_stack = predict.process_img(mouse, model)
 
     if args.postprocess:
-        output_stack = pp.postprocess(mouse, np.array(output_stack))
+        output_stack = pp.postprocess(mouse, np.array(output_stack))  # type: ignore
         if mouse_labels is not None:
-            mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))
+            mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))  # type: ignore
 
     predict.stats(args, output_stack, mouse_labels)
-    nb = predict.get_meta_nb(output_stack > 1.5)
+    nb = predict.get_meta_nb(output_stack > 1.5)  # type: ignore
     print(f"Found: {nb} metastases.")
 
     # Save outputs
