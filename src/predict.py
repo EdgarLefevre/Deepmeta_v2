@@ -66,7 +66,7 @@ def get_predict_dataset(path_souris, contrast=True):
     return mouse
 
 
-def get_labels(path: str) -> List['np.ndarray']:
+def get_labels(path: str) -> List["np.ndarray"]:
     """
     Loads the labels from the given path
 

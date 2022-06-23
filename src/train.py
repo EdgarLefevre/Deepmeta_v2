@@ -55,7 +55,7 @@ def save_model(net: nn.Module, loss: float) -> None:
         pprint.print_bold_red("Model saved")
 
 
-def save_model_on_metric(net: nn.Module, metric: 'np.ndarray') -> None:
+def save_model_on_metric(net: nn.Module, metric: "np.ndarray") -> None:
     """
     Save the model if the loss is lower than the previous one.
 
