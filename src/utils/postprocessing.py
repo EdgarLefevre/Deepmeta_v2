@@ -48,6 +48,7 @@ def process_meta_number(meta_masks: 'np.ndarray') -> int:
     return N
 
 
+
 def laplace(img_stack: 'np.ndarray', mask_list: 'np.ndarray') -> 'np.ndarray':
     """
     Remove false positives in lung segmentation. Apply a
