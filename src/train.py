@@ -247,8 +247,8 @@ def evaluate(net: nn.Module, test_loader: torch.utils.data.DataLoader) -> None:
                     torch.flatten(outputs).cpu().detach().numpy(),
                     average=None,
                 )
-                / labels.shape[0]
-            )  # noqa
+                / labels.shape[0]  # noqa
+            )
     f1_metric = np.array(f1) / float(i + 1)
     pprint.print_mag(
         f"F1 bg: {f1_metric[0]:.3f} "
