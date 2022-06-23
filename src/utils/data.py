@@ -3,12 +3,12 @@ import argparse
 from typing import Any, Tuple
 
 import numpy as np
-import skimage.exposure as exposure
-import skimage.io as io
-import sklearn.model_selection as sk
-import torch
-import torch.utils.data as tud
-from torch.utils.data import DataLoader
+import skimage.exposure as exposure  # type: ignore
+import skimage.io as io  # type: ignore
+import sklearn.model_selection as sk  # type: ignore
+import torch  # type: ignore
+import torch.utils.data as tud  # type: ignore
+from torch.utils.data import DataLoader  # type: ignore
 
 import src.utils.utils as utils
 

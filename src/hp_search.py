@@ -4,10 +4,11 @@
 import os
 
 import numpy as np
-import optuna
-import torch
-import wandb
-from optuna.trial import TrialState
+import optuna  # type: ignore
+import torch  # type: ignore
+import torch.nn as nn  # type: ignore
+import wandb  # type: ignore
+from optuna.trial import TrialState  # type: ignore
 
 import src.predict as p
 import src.train as t
@@ -20,9 +21,9 @@ if os.uname()[1] == "iss":
 else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
     TEST_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Souris_Test/"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "4"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "6,7"
 
-EXPERIMENT_NAME = "unet_multiclass_hp_search"
+EXPERIMENT_NAME = "unet_multiclass_hp_search_weights"
 ENTITY = "elefevre"
 
 
@@ -36,32 +37,32 @@ def create_folders():
 
 def objective(trial):
     args = utils.get_args()
-    net = utils.get_model(args).cuda()
+    config = dict(trial.params)
+    config["trial.number"] = trial.number
+    config["w2"] = trial.suggest_int("w2", 1, 20)
+    config["w3"] = trial.suggest_int("w3", 1, 20)
+    config["w4"] = trial.suggest_int("w4", 1, 20)
+    config["w5"] = trial.suggest_int("w5", 1, 20)
+    args.w2 = config["w2"]
+    args.w3 = config["w3"]
+    args.w4 = config["w4"]
+    args.w5 = config["w5"]
+
+    net = nn.DataParallel(utils.get_model(args)).cuda()
     dataloader = data.get_datasets(f"{BASE_PATH}Images/", f"{BASE_PATH}Labels/", args)
     optimizer = torch.optim.Adam(net.parameters(), lr=args.lr)
     scaler = torch.cuda.amp.GradScaler()
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, args.restart, args.restart_mult
     )
-    # init tracking experiment.
-    # hyper-parameters, trial id are stored.
-    config = dict(trial.params)
-    config["trial.number"] = trial.number
-
-    config["alpha"] = trial.suggest_float("alpha", 0.1, 1.0, log=True)
-    config["beta"] = trial.suggest_float("beta", 0.1, 1.0, log=True)
-    config["gamma"] = trial.suggest_float("gamma", 0.1, 1.0, log=True)
-
     wandb.init(
-        project="DeepMeta Multiclass",
+        project="DeepMeta Multiclass weighting",
         entity=ENTITY,  # NOTE: this entity depends on your wandb account.
         config=config,
         group=EXPERIMENT_NAME,
         reinit=True,
     )
-    criterion = utils.FusionLoss(
-        args, alpha=config["alpha"][0], beta=config["beta"][0], gamma=config["gamma"][0]
-    )
+    criterion = utils.FusionLoss(args)
     for epoch in range(args.epochs):
         print(f"Training epoch: {epoch+1}")
         net.train()

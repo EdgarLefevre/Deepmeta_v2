@@ -7,13 +7,13 @@ from itertools import filterfalse as ifilterfalse
 from typing import Any, List, Tuple
 
 import numpy as np
-import skimage.io as io
-import sklearn.metrics as metrics
-import torch
-import torch.nn as nn
-import torch.nn.init as init
-from matplotlib import pyplot as plt
-from torch.autograd import Variable
+import skimage.io as io  # type: ignore
+import sklearn.metrics as metrics  # type: ignore
+import torch  # type: ignore
+import torch.nn as nn  # type: ignore
+import torch.nn.init as init  # type: ignore
+from matplotlib import pyplot as plt  # type: ignore
+from torch.autograd import Variable  # type: ignore
 
 import src.models.unet as unet
 import src.models.unet_parts as up
@@ -604,9 +604,9 @@ class FusionLoss(nn.Module):
     def __init__(
         self,
         args: argparse.Namespace,
-        alpha: float = 1,
-        beta: float = 1,
-        gamma: float = 1,
+        alpha: float = 0.7,
+        beta: float = 0.2,
+        gamma: float = 0.9,
         device: str = "cuda",
     ) -> None:
         super(FusionLoss, self).__init__()
@@ -617,7 +617,7 @@ class FusionLoss(nn.Module):
         self.focal = torch.hub.load(
             "adeelh/pytorch-multi-class-focal-loss",
             model="FocalLoss",
-            alpha=torch.tensor([1.0, 5.0, 15.0]).to(device),
+            alpha=torch.tensor([1.0, args.w4, args.w5]).to(device),
             gamma=2,
             reduction="mean",
             force_reload=False,

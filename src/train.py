@@ -7,11 +7,11 @@ import os
 from typing import Dict, List, Tuple
 
 import numpy as np
-import progressbar
-import torch
-import torch.nn as nn
-import torch.utils.data as tud
-from sklearn.metrics import f1_score
+import progressbar  # type: ignore
+import torch  # type: ignore
+import torch.nn as nn  # type: ignore
+import torch.utils.data as tud  # type: ignore
+from sklearn.metrics import f1_score  # type: ignore
 
 import src.utils.data as data
 import src.utils.pprint as pprint

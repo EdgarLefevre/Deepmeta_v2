@@ -1,11 +1,11 @@
 #!/usr/bin/python3.10
 # -*- coding: utf-8 -*-
 
-import cc3d
-import cv2
+import cc3d  # type: ignore
+import cv2  # type: ignore
 import numpy as np
-import skimage.measure as measure
-from scipy import ndimage
+import skimage.measure as measure  # type: ignore
+from scipy import ndimage  # type: ignore
 
 
 def remove_blobs(mask: np.array, min_size: int = 10) -> np.array:

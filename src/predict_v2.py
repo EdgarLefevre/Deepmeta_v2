@@ -3,10 +3,10 @@ import os
 from typing import List
 
 import numpy as np
-import skimage.io as io
-import skimage.transform as transform
-import torch
-import torch.nn as nn
+import skimage.io as io  # type: ignore
+import skimage.transform as transform  # type: ignore
+import torch  # type: ignore
+import torch.nn as nn  # type: ignore
 
 import src.predict as predict
 import src.utils.data as data
