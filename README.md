@@ -21,7 +21,7 @@ Deep learning techniques used to segment lungs and metastasis on mice MRI images
 
 ## Installation
 
-We recommend you to use conda to create and manage dependencies.
+We recommend you to use conda to create your virtual env and manage dependencies.
 
 To install required libraries:
 ```shell script
