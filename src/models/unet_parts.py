@@ -153,11 +153,13 @@ class OutConv(nn.Module):
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.conv(x)
 
-'''
+
+"""
 ################################################################################
 ## Residual Blocks
 ################################################################################
-'''
+"""
+
 
 class DoubleConvFullPreact(nn.Module):
     """
@@ -265,11 +267,13 @@ class Up_Block_res(nn.Module):
         x = torch.cat([conc, x1], dim=1)
         return self.conv(x)
 
-'''
+
+"""
 ################################################################################
 ## Tweaks
 ################################################################################
-'''
+"""
+
 
 class SeparableConv2d(nn.Module):
     def __init__(
