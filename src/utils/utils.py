@@ -617,7 +617,7 @@ class FusionLoss(nn.Module):
         self.focal = torch.hub.load(
             "adeelh/pytorch-multi-class-focal-loss",
             model="FocalLoss",
-            alpha=torch.tensor([1.0, args.w4, args.w5]).to(device),
+            alpha=torch.tensor([1.0, args.w2, args.w3]).to(device),
             gamma=2,
             reduction="mean",
             force_reload=False,

@@ -39,10 +39,10 @@ def objective(trial):
     args = utils.get_args()
     config = dict(trial.params)
     config["trial.number"] = trial.number
-    config["w2"] = trial.suggest_int("w2", 1, 20)
-    config["w3"] = trial.suggest_int("w3", 1, 20)
-    config["w4"] = trial.suggest_int("w4", 1, 20)
-    config["w5"] = trial.suggest_int("w5", 1, 20)
+    config["w2"] = trial.suggest_int("w2", 1, 10)
+    config["w3"] = trial.suggest_int("w3", 10, 20)
+    config["w4"] = trial.suggest_int("w4", 1, 10)
+    config["w5"] = trial.suggest_int("w5", 10, 20)
     args.w2 = config["w2"]
     args.w3 = config["w3"]
     args.w4 = config["w4"]
@@ -56,7 +56,7 @@ def objective(trial):
         optimizer, args.restart, args.restart_mult
     )
     wandb.init(
-        project="DeepMeta Multiclass weighting",
+        project="DeepMeta_weighting",
         entity=ENTITY,  # NOTE: this entity depends on your wandb account.
         config=config,
         group=EXPERIMENT_NAME,
@@ -107,7 +107,7 @@ def objective(trial):
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize")
+    study = optuna.create_study(direction="maximize", pruner=optuna.pruners.HyperbandPruner())
     study.optimize(objective, n_trials=100)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])
@@ -125,4 +125,4 @@ if __name__ == "__main__":
 
     print("  Params: ")
     for key, value in trial.params.items():
-        print("    {}: {}".format(key, value))
+        print(f"    {key}: {value}")

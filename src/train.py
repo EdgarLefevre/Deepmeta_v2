@@ -32,9 +32,9 @@ if os.uname()[1] == "iss":
     BASE_PATH = "/home/edgar/Documents/Datasets/deepmeta/Data/3classes_metas/"
 else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "0,5"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "6,7"
 
-SAVE_PATH = "data/test_multigpu.pth"
+SAVE_PATH = "data/final_model.pth"
 LOSS = np.inf
 METRIC = np.array([-1.0, -1.0, -1.0])
 
@@ -133,16 +133,6 @@ def _step(
     )
     if step == "Val":
         save_model(net, epoch_loss)
-        # if args.hp:
-        #     # with tune.checkpoint_dir(epoch) as checkpoint_dir:
-        #     #     path = os.path.join(checkpoint_dir, "checkpoint")
-        #     #     torch.save((net.state_dict(), optimizer.state_dict()), path)
-        #     tune.report(
-        #         loss=epoch_loss,
-        #         metric=f1_metric,
-        #         metric_lungs=f1_metric[1],
-        #         metric_metas=f1_metric[2],
-        #     )
     return epoch_loss
 
 

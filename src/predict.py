@@ -21,7 +21,7 @@ if os.uname()[1] == "iss":
 else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/Souris_Test/"
     BASE_PATH2 = "/home/elefevre/Datasets/deepmeta/Test_annotation_2/"
-    os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+    os.environ["CUDA_VISIBLE_DEVICES"] = "7"
 
 
 def load_model(config: argparse.Namespace, device: str = "cuda") -> nn.Module:
@@ -37,10 +37,14 @@ def load_model(config: argparse.Namespace, device: str = "cuda") -> nn.Module:
     :return: The model with weights loaded
     :rtype: nn.Module
     """
-    model = utils.get_model(config)
-    model.load_state_dict(
-        torch.load(f"data/{config.model_path}.pth", map_location=device)
-    )
+    try:
+        model = nn.DataParallel(utils.get_model(config))
+        model.load_state_dict(
+            torch.load(f"data/{config.model_path}.pth", map_location=device)
+        )
+    except Exception:
+        model = utils.get_model(config)
+        model.load_state_dict(torch.load(f"data/{config.model_path}.pth", map_location=device))
     model.eval()
     return model
 
