@@ -107,7 +107,9 @@ def objective(trial):
 
 
 if __name__ == "__main__":
-    study = optuna.create_study(direction="maximize", pruner=optuna.pruners.HyperbandPruner())
+    study = optuna.create_study(
+        direction="maximize", pruner=optuna.pruners.HyperbandPruner()
+    )
     study.optimize(objective, n_trials=100)
 
     pruned_trials = study.get_trials(deepcopy=False, states=[TrialState.PRUNED])

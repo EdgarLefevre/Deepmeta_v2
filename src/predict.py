@@ -44,7 +44,9 @@ def load_model(config: argparse.Namespace, device: str = "cuda") -> nn.Module:
         )
     except Exception:
         model = utils.get_model(config)
-        model.load_state_dict(torch.load(f"data/{config.model_path}.pth", map_location=device))
+        model.load_state_dict(
+            torch.load(f"data/{config.model_path}.pth", map_location=device)
+        )
     model.eval()
     return model
 
