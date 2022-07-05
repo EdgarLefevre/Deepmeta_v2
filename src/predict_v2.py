@@ -13,6 +13,7 @@ import src.utils.data as data
 import src.utils.postprocessing as pp
 import src.utils.pprint as pprint
 import src.utils.utils as utils
+import src.utils.csv_functions as csv_functions
 
 if os.uname()[1] != "iss":
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
@@ -26,7 +27,7 @@ if __name__ == "__main__":
 
     # Load images
     name = args.img_path.split("/")[-1].split(".")[0]
-    pprint.print_gre("Predicting on {}".format(name))
+    pprint.print_gre(f"Predicting on {name}")
     mouse = predict.get_predict_dataset(args.img_path, contrast=args.contrast)
 
     # Load labels
@@ -45,8 +46,22 @@ if __name__ == "__main__":
 
     predict.stats(args, output_stack, mouse_labels)
     nb = predict.get_meta_nb(output_stack > 1.5)  # type: ignore
+    print(f"Lungs volume: {(output_stack > 0.5).sum() * 0.0047} mm3")
     print(f"Found: {nb} metastases.")
-
+    print(f"Metastases volume: {(output_stack > 1.5).sum() * 0.0047} mm3")
+    # csv_functions.write_in_csv("lacz_vs_il34.csv",
+    #                            name,
+    #                            "32",  # day
+    #                            (output_stack > 0.5).sum() * 0.0047,  # vol lungs
+    #                            (output_stack > 1.5).sum() * 0.0047,  # vol metastases
+    #                            ((output_stack > 1.5).sum() * 0.0047)/nb,  # vol_pm
+    #                            "Fast"  # fast or slow
+    #                            )
+    # csv_functions.nb_meta_volume_v2((output_stack > 1.5),
+    #                                 "metaid.csv",
+    #                                 name,
+    #                                 "Slow"
+    #                                 )
     # Save outputs
     if args.save:
         os.system(f"mkdir -p data/{name}")

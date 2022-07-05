@@ -150,7 +150,7 @@ def get_args() -> argparse.Namespace:
         type=str,
         default="iou",
         help="Metric for stats. iou or f1",
-        choices=["iou", "f1"],
+        choices=["iou", "f1", "auc"],
     )
     parser.add_argument(
         "--loss",
@@ -359,6 +359,8 @@ def get_metric(args: argparse.Namespace) -> Any:
             metric = metrics.f1_score
         case "iou":
             metric = metrics.jaccard_score
+        case "auc":
+            metric = metrics.roc_auc_score
         case _:
             raise ValueError(f"Unknown metric {args.metric}")
     return metric
