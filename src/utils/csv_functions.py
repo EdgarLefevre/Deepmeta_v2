@@ -1,5 +1,6 @@
 import os
-import cc3d  # type: ignore
+
+import cc3d # type: ignore
 
 
 def write_in_csv(filename, mousename, day, vol_l, vol_m, vol_pm, mutation):

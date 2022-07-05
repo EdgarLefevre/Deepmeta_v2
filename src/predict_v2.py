@@ -9,11 +9,11 @@ import torch  # type: ignore
 import torch.nn as nn  # type: ignore
 
 import src.predict as predict
+import src.utils.csv_functions as csv_functions
 import src.utils.data as data
 import src.utils.postprocessing as pp
 import src.utils.pprint as pprint
 import src.utils.utils as utils
-import src.utils.csv_functions as csv_functions
 
 if os.uname()[1] != "iss":
     os.environ["CUDA_VISIBLE_DEVICES"] = "0"
