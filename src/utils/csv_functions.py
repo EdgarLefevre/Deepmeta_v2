@@ -1,6 +1,6 @@
 import os
 
-import cc3d # type: ignore
+import cc3d  # type: ignore
 
 
 def write_in_csv(filename, mousename, day, vol_l, vol_m, vol_pm, mutation):
@@ -25,20 +25,7 @@ def write_in_csv(filename, mousename, day, vol_l, vol_m, vol_pm, mutation):
     """
     check_and_create_file(filename)
     with open(filename, "a") as f:
-        f.write(
-            mousename
-            + ","
-            + day
-            + ","
-            + str(vol_l)
-            + ","
-            + str(vol_m)
-            + ","
-            + str(vol_pm)
-            + ","
-            + mutation
-            + "\n"
-        )
+        f.write(f"{mousename},{day},{vol_l},{vol_m},{vol_pm},{mutation}" + "\n")
 
 
 def write_meta_in_csv(filename, mousename, meta_id, vol, mutation):
