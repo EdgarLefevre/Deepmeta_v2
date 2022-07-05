@@ -138,9 +138,9 @@ if __name__ == "__main__":
             mouse_labels = pp.postprocess(mouse, np.array(mouse_labels))  # type: ignore
         stats_list.append(stats(args, output_stack, mouse_labels))  # type: ignore
         nb = get_meta_nb(output_stack > 1.5)  # type: ignore
-        print(f"Lungs volume: {(output_stack >0.5).sum() * 0.0047} mm3")
+        print(f"Lungs volume: {(output_stack >0.5).sum() * 0.0047} mm3")  # type: ignore
         print(f"Found: {nb} metastases.")
-        print(f"Metastases volume: {(output_stack > 1.5).sum() * 0.0047} mm3")
+        print(f"Metastases volume: {(output_stack > 1.5).sum() * 0.0047} mm3")  # type: ignore
         if args.save:
             os.system(f"mkdir -p data/{name}")
             for i, (slice, output, label) in enumerate(

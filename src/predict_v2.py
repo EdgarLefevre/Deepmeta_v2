@@ -46,9 +46,9 @@ if __name__ == "__main__":
 
     predict.stats(args, output_stack, mouse_labels)
     nb = predict.get_meta_nb(output_stack > 1.5)  # type: ignore
-    print(f"Lungs volume: {(output_stack > 0.5).sum() * 0.0047} mm3")
+    print(f"Lungs volume: {(output_stack > 0.5).sum() * 0.0047} mm3")  # type: ignore
     print(f"Found: {nb} metastases.")
-    print(f"Metastases volume: {(output_stack > 1.5).sum() * 0.0047} mm3")
+    print(f"Metastases volume: {(output_stack > 1.5).sum() * 0.0047} mm3")  # type: ignore
     # csv_functions.write_in_csv("lacz_vs_il34.csv",
     #                            name,
     #                            "32",  # day
