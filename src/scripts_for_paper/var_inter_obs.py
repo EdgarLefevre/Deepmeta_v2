@@ -1,7 +1,9 @@
+import os
+import re
+
 import numpy as np
 import skimage.io as io
-import re
-import os
+
 
 def inverse_binary_mask(msk):
     """

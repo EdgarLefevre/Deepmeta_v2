@@ -1,14 +1,15 @@
+import argparse
+import multiprocessing
 import os
-import skimage.io as io
-import skimage
+import time
+
 import cv2
 import numpy as np
-import scipy.ndimage.filters as filters
-import scipy
-import multiprocessing
-import argparse
-import time
 import pandas as pd
+import scipy
+import scipy.ndimage.filters as filters
+import skimage
+import skimage.io as io
 
 ##################################################################################
 ########################## DATA PREPARATION ######################################      
