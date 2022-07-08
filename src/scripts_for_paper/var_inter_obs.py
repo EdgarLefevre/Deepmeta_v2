@@ -30,7 +30,9 @@ def stats_pixelbased(y_true, y_pred):
     """
     y_pred = y_pred.reshape(128, 128)
     if y_pred.shape != y_true.shape:
-        raise ValueError(f"Shape of inputs need to match. Shape of prediction is: {y_pred.shape}.  Shape of y_true is: {y_true.shape}")
+        raise ValueError(
+            f"Shape of inputs need to match. Shape of prediction is: {y_pred.shape}.  Shape of y_true is: {y_true.shape}"
+        )
 
     pred = y_pred
     truth = y_true
@@ -45,29 +47,34 @@ def stats_pixelbased(y_true, y_pred):
     # Fmeasure = (2 * precision * recall) / (precision + recall)
     return -2 if union.sum() == 0 else intersection.sum() / union.sum()
 
+
 def ratio(mask1, mask2):
     mask1 = np.array(mask1)
     mask2 = np.array(mask2)
     den = np.maximum(mask1.sum(), mask2.sum())
     num = np.minimum(mask1.sum(), mask2.sum())
-    return 1.-(num/den) if den != num else 0.
+    return 1.0 - (num / den) if den != num else 0.0
+
 
 def diff(mask1, mask2):
     mask1 = np.array(mask1)
     mask2 = np.array(mask2)
     _max = np.maximum(mask1.sum(), mask2.sum())
     _min = np.minimum(mask1.sum(), mask2.sum())
-    return _max-_min
+    return _max - _min
+
 
 def sorted_alphanumeric(data):
     convert = lambda text: int(text) if text.isdigit() else text.lower()  # noqa
     alphanum_key = lambda key: [convert(c) for c in re.split("([0-9]+)", key)]  # noqa
     return sorted(data, key=alphanum_key)
 
+
 def list_files_path(path):
     return sorted_alphanumeric(
         [path + f for f in os.listdir(path) if os.path.isfile(os.path.join(path, f))]
     )
+
 
 def main(path1, path2):
     file_list1 = list_files_path(path1)
@@ -75,10 +82,10 @@ def main(path1, path2):
     res_ratio = []
     res_iou = []
     res_diff = []
-    for i, file1 in enumerate(file_list1): 
+    for i, file1 in enumerate(file_list1):
         file2 = file_list2[i]
-        im_em = io.imread(file1, plugin="tifffile")/255
-        im_ed = io.imread(file2, plugin="tifffile")/255
+        im_em = io.imread(file1, plugin="tifffile") / 255
+        im_ed = io.imread(file2, plugin="tifffile") / 255
 
         # print("SUM : {} em ; {} ed \nratio = {}".format(im_em.sum(), im_ed.sum(), ratio(im_em, im_ed) ))
         # print("SUM : {} em ; {} ed \ndiff = {}".format(im_em.sum(), im_ed.sum(), diff(im_em, im_ed) ))
@@ -92,17 +99,16 @@ def main(path1, path2):
     print(f"mean iou {np.array(res_iou).mean()}")
     print(f"mean diff {np.array(res_diff).mean()}")
 
+
 if __name__ == "__main__":
     BASE_PATH_TEST = "/home/edgar/Documents/Datasets/deepmeta/deepmeta_dataset/Test/"
     BASE_PATH_ANNOT = "/home/edgar/Documents/Datasets/deepmeta/Test_annotation_2/"
-    
+
     mice = ["m2Pc_c1_10Corr_1", "56_2PLc_day106", "28_2Pc_day50", "8_m2PL_day25"]
     for mouse in mice:
         print(f"{mouse} lungs")
-        main(BASE_PATH_TEST+mouse+"/lungs/", BASE_PATH_ANNOT+mouse+"/Lungs/")
+        main(BASE_PATH_TEST + mouse + "/lungs/", BASE_PATH_ANNOT + mouse + "/Lungs/")
         print("\n")
         print(f"{mouse} Metas")
-        main(BASE_PATH_TEST+mouse+"/metas/", BASE_PATH_ANNOT+mouse+"/Metas/")
-        print(100*'-')
-    
-    
+        main(BASE_PATH_TEST + mouse + "/metas/", BASE_PATH_ANNOT + mouse + "/Metas/")
+        print(100 * "-")
