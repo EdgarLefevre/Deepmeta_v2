@@ -607,8 +607,8 @@ class FusionLoss(nn.Module):
         self,
         args: argparse.Namespace,
         alpha: float = 0.7,
-        beta: float = 0.2,
-        gamma: float = 0.9,
+        beta: float = 0.4,
+        gamma: float = 0.2,
         device: str = "cuda",
     ) -> None:
         super(FusionLoss, self).__init__()

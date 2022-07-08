@@ -6,7 +6,7 @@
 </a>
 
 
-![CBiB Logo](imgs/cbib_logo.png)
+[![CBiB Logo](imgs/cbib_logo.png)](https://www.cbib.u-bordeaux.fr/)
 
 Deep learning techniques used to segment lungs and metastasis on mice MRI images.
 
