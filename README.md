@@ -1,6 +1,6 @@
 # DeepMeta
 
-[![License](https://img.shields.io/github/license/EdgarLefevre/deepmeta?label=license)](https://github.com/EdgarLefevre/deepmeta/blob/main/LICENSE) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![License](https://img.shields.io/github/license/cbib/Deepmeta?label=license)](https://github.com/cbib/Deepmeta/blob/main/LICENSE) [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 <a href="https://gitmoji.dev">
   <img src="https://img.shields.io/badge/gitmoji-%20😜%20😍-FFDD67.svg?style=flat-square" alt="Gitmoji">
 </a>
