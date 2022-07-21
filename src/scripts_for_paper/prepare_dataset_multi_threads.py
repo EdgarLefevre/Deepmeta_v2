@@ -204,7 +204,7 @@ def multi_process_fun(file_list, dirpath, function, num_workers):
     for worker_num in range(num_workers):
         if worker_num == range(num_workers)[-1]:
             process = multiprocessing.Process(
-                target=function, args=(dirpath, file_list[worker_amount * worker_num:])
+                target=function, args=(dirpath, file_list[worker_amount * worker_num :])
             )
         else:
             process = multiprocessing.Process(
@@ -212,8 +212,8 @@ def multi_process_fun(file_list, dirpath, function, num_workers):
                 args=(
                     dirpath,
                     file_list[
-                        worker_amount * worker_num:
-                        worker_amount * worker_num + worker_amount
+                        worker_amount * worker_num : worker_amount * worker_num
+                        + worker_amount
                     ],
                 ),
             )
