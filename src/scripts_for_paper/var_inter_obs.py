@@ -1,8 +1,8 @@
 import os
 import re
 
-import numpy as np
-import skimage.io as io
+import numpy as np  # type: ignore
+import skimage.io as io  # type: ignore
 
 
 def inverse_binary_mask(msk):
@@ -31,7 +31,7 @@ def stats_pixelbased(y_true, y_pred):
     y_pred = y_pred.reshape(128, 128)
     if y_pred.shape != y_true.shape:
         raise ValueError(
-            f"Shape of inputs need to match. Shape of prediction is: {y_pred.shape}.  Shape of y_true is: {y_true.shape}"
+            f"Shape of inputs need to match. Shape of prediction is: {y_pred.shape}.  Shape of y_true is: {y_true.shape}"  # noqa
         )
 
     pred = y_pred
@@ -86,9 +86,6 @@ def main(path1, path2):
         file2 = file_list2[i]
         im_em = io.imread(file1, plugin="tifffile") / 255
         im_ed = io.imread(file2, plugin="tifffile") / 255
-
-        # print("SUM : {} em ; {} ed \nratio = {}".format(im_em.sum(), im_ed.sum(), ratio(im_em, im_ed) ))
-        # print("SUM : {} em ; {} ed \ndiff = {}".format(im_em.sum(), im_ed.sum(), diff(im_em, im_ed) ))
         res_diff.append(diff(im_ed, im_em))
         iou = stats_pixelbased(im_ed, im_em)
         # print("iou = {}".format(iou))

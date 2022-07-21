@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import argparse
-import collections
-import collections.abc
 import os
 from typing import Dict, List, Tuple
 

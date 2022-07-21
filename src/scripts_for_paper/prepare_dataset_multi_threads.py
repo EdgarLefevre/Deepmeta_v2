@@ -3,16 +3,16 @@ import multiprocessing
 import os
 import time
 
-import cv2
-import numpy as np
-import pandas as pd
-import scipy
-import scipy.ndimage.filters as filters
-import skimage
-import skimage.io as io
+import cv2  # type: ignore
+import numpy as np  # type: ignore
+import pandas as pd  # type: ignore
+import scipy  # type: ignore
+import scipy.ndimage.filters as filters  # type: ignore
+import skimage  # type: ignore
+import skimage.io as io  # type: ignore
 
 ##################################################################################
-########################## DATA PREPARATION ######################################
+########################## DATA PREPARATION ######################################  #noqa
 ##################################################################################
 
 
@@ -63,7 +63,7 @@ def img_to_slices():
         tiff_path += list_files_path(path)
 
     LAB_PATH = "Lungs/Labels/"
-    l = list_files(LAB_PATH)
+    l_lungs = list_files(LAB_PATH)
 
     LAB_PATH_metas = "Metastases/Labels/"
     l_metas = list_files(LAB_PATH_metas)
@@ -72,12 +72,12 @@ def img_to_slices():
         file_nb = get_number(img_path)
         i = 128 * file_nb
         img_indexes = range(i, i + 128)
-        process_img(img_path, img_indexes, l, "Lungs/Images/")
+        process_img(img_path, img_indexes, l_lungs, "Lungs/Images/")
         process_img(img_path, img_indexes, l_metas, "Metastases/Images/")
 
 
 ##################################################################################
-########################## DATA AUGMENTATION #####################################
+########################## DATA AUGMENTATION #####################################  #noqa
 ##################################################################################
 
 
@@ -151,7 +151,6 @@ def elastic_transform_wrapped(img, mask, path_img, path_mask):
     im_mask = io.imread(path_mask + mask, plugin="tifffile")
     im_merge = np.concatenate((im[..., None], im_mask[..., None]), axis=2)
 
-    # im_merge_t = elastic_transform(im_merge, im_merge.shape[1] * 3, im_merge.shape[1] * 0.09, im_merge.shape[1] * 0.09)
     im_merge_t = elastic_transform(
         im_merge,
         im_merge.shape[1] * 2,
@@ -193,7 +192,7 @@ def main_DA():
 
 
 ##################################################################################
-########################## Multi Processing ######################################
+########################## Multi Processing ######################################  #noqa
 ##################################################################################
 
 
@@ -205,7 +204,7 @@ def multi_process_fun(file_list, dirpath, function, num_workers):
     for worker_num in range(num_workers):
         if worker_num == range(num_workers)[-1]:
             process = multiprocessing.Process(
-                target=function, args=(dirpath, file_list[worker_amount * worker_num :])
+                target=function, args=(dirpath, file_list[worker_amount * worker_num:])
             )
         else:
             process = multiprocessing.Process(
@@ -213,8 +212,8 @@ def multi_process_fun(file_list, dirpath, function, num_workers):
                 args=(
                     dirpath,
                     file_list[
-                        worker_amount * worker_num : worker_amount * worker_num
-                        + worker_amount
+                        worker_amount * worker_num:
+                        worker_amount * worker_num + worker_amount
                     ],
                 ),
             )
@@ -287,7 +286,7 @@ def get_args():
 
 
 ##################################################################################
-########################## 3 classes masks #######################################
+########################## 3 classes masks #######################################  #noqa
 ##################################################################################
 
 
@@ -356,7 +355,7 @@ def multi_classes_test():
                 assert np.max(lung_mask) <= 1
                 new_mask = create_new_mask(lung_mask, meta_mask)
                 io.imsave(f"{BASE_PATH+name}/3classes/" + f_name, new_mask)
-            except Exception as e:
+            except Exception:
                 print(f_name)
 
 
