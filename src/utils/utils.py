@@ -650,7 +650,7 @@ class FusionLoss_invert(nn.Module):
         super(FusionLoss_invert, self).__init__()
         self.w1, self.w2, self.w3 = inverse_freq_weights(
             list_files_path(
-                "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/Labels"
+                "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/Labels/"
             )
         )
         self.ce = nn.CrossEntropyLoss(
