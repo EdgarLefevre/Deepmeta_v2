@@ -416,7 +416,8 @@ def get_loss(args: argparse.Namespace, device: str = "cuda") -> Any:
         case "lovasz":
             criterion = LovaszLoss(per_image=True).to(device)
         case "fusion":
-            criterion = FusionLoss(args, device=device).to(device)
+            # criterion = FusionLoss(args, device=device).to(device)
+            criterion = FusionLoss_invert(args, device=device).to(device)
         case _:
             raise ValueError(f"Unknown loss function {args.loss}")
     return criterion
@@ -635,6 +636,52 @@ class FusionLoss(nn.Module):
             + self.beta * self.lovasz(y_pred, y_true)  # noqa
             + self.gamma * self.focal(y_pred, y_true)  # noqa  # noqa
         )
+
+
+class FusionLoss_invert(nn.Module):
+    def __init__(
+        self,
+        args: argparse.Namespace,
+        alpha: float = 0.7,
+        beta: float = 0.4,
+        gamma: float = 0.2,
+        device: str = "cuda",
+    ) -> None:
+        super(FusionLoss, self).__init__()
+        self.w1, self.w2, self.w3 = inverse_freq_weights(list_files_path("/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/Labels"))
+        self.ce = nn.CrossEntropyLoss(
+            weight=torch.tensor([self.w1, self.w2, self.w3]).to(device),  # [args.w1, args.w2, args.w3]).to(device),
+            label_smoothing=0.1,
+        )
+        self.focal = torch.hub.load(
+            "adeelh/pytorch-multi-class-focal-loss",
+            model="FocalLoss",
+            alpha=torch.tensor([self.w1, self.w2, self.w3]).to(device),  # [1.0, args.w2, args.w3]).to(device),
+            gamma=2,
+            reduction="mean",
+            force_reload=False,
+        )
+        self.lovasz = LovaszLoss(per_image=True)
+        self.alpha = alpha
+        self.beta = beta
+        self.gamma = gamma
+
+    def forward(self, y_pred: torch.Tensor, y_true: torch.Tensor) -> torch.Tensor:
+        return (
+            self.alpha * self.ce(y_pred, y_true)
+            + self.beta * self.lovasz(y_pred, y_true)  # noqa
+            + self.gamma * self.focal(y_pred, y_true)  # noqa  # noqa
+        )
+
+def inverse_freq_weights(path_labels):
+    sum0, sum1, sum2 = 0, 0, 0
+    for img_path in path_labels:
+        img = io.imread(img_path)
+        sum0 += np.count_nonzero(img == 0)
+        sum1 += np.count_nonzero(img == 1)
+        sum2 += np.count_nonzero(img == 2)
+    total = sum0+sum1+sum2
+    return total/(3*sum0), total/(3*sum1), total/(3*sum2)
 
 
 if __name__ == "__main__":

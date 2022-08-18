@@ -32,7 +32,7 @@ else:
     BASE_PATH = "/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/"
     os.environ["CUDA_VISIBLE_DEVICES"] = "6,7"
 
-SAVE_PATH = "data/final_model.pth"
+SAVE_PATH = "data/model_inv_freq.pth"
 LOSS = np.inf
 METRIC = np.array([-1.0, -1.0, -1.0])
 
