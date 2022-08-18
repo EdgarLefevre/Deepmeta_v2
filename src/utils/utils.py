@@ -647,7 +647,7 @@ class FusionLoss_invert(nn.Module):
         gamma: float = 0.2,
         device: str = "cuda",
     ) -> None:
-        super(FusionLoss, self).__init__()
+        super(FusionLoss_invert, self).__init__()
         self.w1, self.w2, self.w3 = inverse_freq_weights(list_files_path("/home/elefevre/Datasets/deepmeta/3classesv2/3classesv2_full/Labels"))
         self.ce = nn.CrossEntropyLoss(
             weight=torch.tensor([self.w1, self.w2, self.w3]).to(device),  # [args.w1, args.w2, args.w3]).to(device),
