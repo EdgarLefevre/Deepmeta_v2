@@ -96,7 +96,6 @@ def _step(
     :rtype: float
     """
 
-
     running_loss = []
     net.train() if step == "Train" else net.eval()
     dataset = dataloader[step]
