@@ -76,6 +76,7 @@ def _step(
     step: str,
     optimizer: torch.optim.Optimizer,
     scaler: torch.cuda.amp.GradScaler,
+    criterion: torch.nn.Module,
     device: str = "cuda",
 ) -> float:
     """
@@ -95,7 +96,7 @@ def _step(
     :rtype: float
     """
 
-    criterion = utils.get_loss(args, device=device)
+
     running_loss = []
     net.train() if step == "Train" else net.eval()
     dataset = dataloader[step]
@@ -159,6 +160,7 @@ def train(
     scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
         optimizer, args.restart, args.restart_mult
     )
+    criterion = utils.get_loss(args, device=device)
     history_train, history_val = [], []
     print(100 * "-")
     pprint.print_bold_green("Start training...")
@@ -166,7 +168,7 @@ def train(
         pprint.print_gre(f"\nEpoch {epoch + 1}/{args.epochs} :")
         for step in ["Train", "Val"]:
             epoch_loss = _step(
-                net, dataloader, args, step, optimizer, scaler, device=device
+                net, dataloader, args, step, optimizer, scaler, criterion, device=device
             )
             if step == "Val":
                 history_val.append(epoch_loss)
